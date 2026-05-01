@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///Users/jgray/Downloads/lullaby-sleep-timer.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Lullaby">
-  <meta name="theme-color" content="#0c1129">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Lullaby" />
+  <meta name="theme-color" content="#0c1129" />
   <title>Lullaby — Sleep Timer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com/">
-  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-  <link href="./index_files/css2" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg-deep: #07091a;
@@ -472,14 +472,23 @@
     <div class="card">
       <div class="label">YouTube link</div>
       <div class="url-row">
-        <input type="url" class="url-input" id="urlInput" placeholder="Paste a YouTube URL" value="https://youtu.be/yLuEx-XH3Uc" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <input
+          type="url"
+          class="url-input"
+          id="urlInput"
+          placeholder="Paste a YouTube URL"
+          value="https://youtu.be/yLuEx-XH3Uc"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
         <button class="url-load-btn" id="loadBtn">Load</button>
       </div>
       <div class="error-msg" id="errorMsg"></div>
-      <div class="player-frame visible" id="playerFrame">
-        <iframe id="player" frameborder="0" allowfullscreen="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" title="YouTube video player" width="100%" height="100%" src="./index_files/saved_resource.html"></iframe>
+      <div class="player-frame" id="playerFrame">
+        <div id="player"></div>
       </div>
-      <div class="video-title visible" id="videoTitle">Tap play in the video, then begin the lullaby below.</div>
+      <div class="video-title" id="videoTitle"></div>
     </div>
 
     <div class="card">
@@ -492,7 +501,15 @@
         <button class="chip" data-min="90">90<span class="chip-unit">min</span></button>
       </div>
       <div class="custom-row">
-        <input type="number" class="custom-input" id="customMin" placeholder="Custom (minutes)" min="1" max="480" inputmode="numeric">
+        <input
+          type="number"
+          class="custom-input"
+          id="customMin"
+          placeholder="Custom (minutes)"
+          min="1"
+          max="480"
+          inputmode="numeric"
+        />
       </div>
     </div>
 
@@ -502,11 +519,11 @@
         <div class="slider-readout">
           <span id="fadeReadout">15</span><small>seconds</small>
         </div>
-        <input type="range" id="fadeSlider" min="10" max="30" value="15" step="1">
+        <input type="range" id="fadeSlider" min="10" max="30" value="15" step="1" />
       </div>
     </div>
 
-    <button class="start-btn" id="startBtn" disabled="">Begin <em>lullaby</em></button>
+    <button class="start-btn" id="startBtn" disabled>Begin <em>lullaby</em></button>
     <p class="hint">Keep this tab open and the iPad screen on. Lower brightness all the way for a dark room.</p>
   </div>
 
@@ -533,7 +550,7 @@
     </div>
   </div>
 
-  <script type="text/javascript" id="www-widgetapi-script" src="./index_files/www-widgetapi.js" async=""></script><script src="./index_files/iframe_api"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     // ---------- STATE ----------
     let player = null;
@@ -629,14 +646,30 @@
     }
 
     function onPlayerError(e) {
-      showError('That video can\u2019t be embedded. Try a different one.');
+      // Error codes: 101 and 150 = embedding disabled by uploader
+      // 100 = video not found / private, 2 = invalid ID, 5 = HTML5 player error
+      let msg;
+      if (e.data === 101 || e.data === 150) {
+        msg = 'This video\u2019s owner blocked embedding. Try a different upload of the same content.';
+      } else if (e.data === 100) {
+        msg = 'Video not found, removed, or private.';
+      } else if (e.data === 2) {
+        msg = 'That URL doesn\u2019t look like a valid YouTube video.';
+      } else {
+        msg = 'YouTube couldn\u2019t play this video here. Try another link.';
+      }
+      showError(msg, true);
       videoLoaded = false;
+      playerFrame.classList.remove('visible');
+      videoTitle.classList.remove('visible');
       updateStartButton();
     }
 
-    function showError(msg) {
+    function showError(msg, sticky = false) {
       errorMsg.textContent = msg;
-      setTimeout(() => { if (errorMsg.textContent === msg) errorMsg.textContent = ''; }, 4000);
+      if (!sticky) {
+        setTimeout(() => { if (errorMsg.textContent === msg) errorMsg.textContent = ''; }, 4000);
+      }
     }
 
     // ---------- LOAD VIDEO ----------
@@ -831,6 +864,5 @@
       }
     }
   </script>
-
-
-</body></html>
+</body>
+</html>
