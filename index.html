@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Lullaby" />
@@ -15,7 +15,6 @@
     :root {
       --bg-deep: #07091a;
       --bg-mid: #0c1129;
-      --bg-soft: #161b3d;
       --ink: #f4ecdc;
       --ink-dim: rgba(244, 236, 220, 0.62);
       --ink-faint: rgba(244, 236, 220, 0.32);
@@ -26,21 +25,11 @@
       --serif: 'Fraunces', Georgia, serif;
       --sans: 'DM Sans', system-ui, sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    html {
-      -webkit-text-size-adjust: 100%;
-    }
-
-    html, body {
-      overflow-x: hidden;
-      overscroll-behavior-y: none;
-    }
-
+    html { -webkit-text-size-adjust: 100%; touch-action: pan-y; }
+    html, body { overflow-x: hidden; overscroll-behavior-y: none; }
     body {
-      font-family: var(--sans);
-      color: var(--ink);
+      font-family: var(--sans); color: var(--ink); touch-action: pan-y;
       background:
         radial-gradient(ellipse 90% 60% at 30% 0%, rgba(98, 87, 161, 0.35), transparent 60%),
         radial-gradient(ellipse 70% 50% at 80% 100%, rgba(245, 201, 122, 0.10), transparent 55%),
@@ -51,26 +40,12 @@
       position: relative;
       -webkit-overflow-scrolling: touch;
     }
-
-    /* Lock scroll only when timer is running, so the running screen stays put */
-    body.timer-running {
-      overflow: hidden;
-      height: 100vh;
-      padding: 0;
-    }
+    body.timer-running { overflow: hidden; height: 100vh; padding: 0; }
     body.timer-running #running-screen {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
     }
-
-    /* Subtle starfield grain */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background-image:
         radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.5), transparent),
         radial-gradient(1px 1px at 78% 42%, rgba(255,255,255,0.35), transparent),
@@ -79,158 +54,121 @@
         radial-gradient(1px 1px at 88% 22%, rgba(255,255,255,0.45), transparent),
         radial-gradient(1px 1px at 22% 58%, rgba(255,255,255,0.35), transparent);
       opacity: 0.6;
-      z-index: 0;
     }
-
-    .screen {
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 0 28px;
-      position: relative;
-      z-index: 1;
-    }
-
+    .screen { width: 100%; max-width: 720px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
     .hidden { display: none !important; }
 
-    /* ---------- HEADER ---------- */
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 36px;
-    }
+    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
     .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #fff5db, var(--glow));
       box-shadow: 0 0 24px var(--glow-soft), inset -6px -8px 12px rgba(120, 80, 20, 0.35);
       position: relative;
     }
     .brand-mark::after {
-      content: '';
-      position: absolute;
-      width: 14px; height: 14px;
-      top: 4px; right: 2px;
-      border-radius: 50%;
-      background: var(--bg-mid);
-      box-shadow: 0 0 10px var(--bg-mid);
+      content: ''; position: absolute;
+      width: 14px; height: 14px; top: 4px; right: 2px;
+      border-radius: 50%; background: var(--bg-mid); box-shadow: 0 0 10px var(--bg-mid);
     }
-    .brand-text {
-      font-family: var(--serif);
-      font-weight: 400;
-      font-size: 28px;
-      letter-spacing: 0.01em;
-    }
-    .brand-text em {
-      font-style: italic;
-      color: var(--glow);
-      font-weight: 300;
-    }
+    .brand-text { font-family: var(--serif); font-weight: 400; font-size: 28px; }
+    .brand-text em { font-style: italic; color: var(--glow); font-weight: 300; }
 
-    /* ---------- CARD ---------- */
+    .mode-toggle {
+      display: flex; gap: 4px;
+      background: rgba(7, 9, 26, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px; padding: 4px; margin-bottom: 18px;
+    }
+    .mode-btn {
+      flex: 1; background: transparent; border: none; padding: 12px;
+      color: var(--ink-dim); font-family: var(--sans); font-size: 14px; font-weight: 500;
+      cursor: pointer; border-radius: 10px; transition: all 0.2s;
+    }
+    .mode-btn.active { background: var(--glow-soft); color: var(--glow); }
+
     .card {
       background: rgba(22, 27, 61, 0.45);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 24px;
-      padding: 28px;
-      margin-bottom: 18px;
+      border-radius: 24px; padding: 28px; margin-bottom: 18px;
     }
-
     .label {
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink-dim);
-      margin-bottom: 14px;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-dim); margin-bottom: 14px;
     }
-
-    /* ---------- URL INPUT ---------- */
-    .url-row {
-      display: flex;
-      gap: 10px;
-      align-items: stretch;
-    }
-    .url-input {
-      flex: 1;
-      background: rgba(7, 9, 26, 0.5);
+    .src-row { display: flex; gap: 10px; }
+    .src-input {
+      flex: 1; background: rgba(7, 9, 26, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 16px 18px;
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 16px;
-      transition: border-color 0.2s, background 0.2s;
-      min-width: 0;
+      border-radius: 14px; padding: 16px 18px;
+      color: var(--ink); font-family: var(--sans); font-size: 16px;
+      transition: border-color 0.2s, background 0.2s; min-width: 0;
     }
-    .url-input::placeholder { color: var(--ink-faint); }
-    .url-input:focus {
-      outline: none;
-      border-color: var(--glow-line);
-      background: rgba(7, 9, 26, 0.7);
+    .src-input::placeholder { color: var(--ink-faint); }
+    .src-input:focus { outline: none; border-color: var(--glow-line); background: rgba(7, 9, 26, 0.7); }
+    .src-load-btn {
+      background: var(--glow); color: var(--bg-deep); border: none;
+      border-radius: 14px; padding: 0 22px;
+      font-family: var(--sans); font-weight: 600; font-size: 15px;
+      cursor: pointer; transition: transform 0.15s;
     }
-    .url-load-btn {
-      background: var(--glow);
-      color: var(--bg-deep);
-      border: none;
-      border-radius: 14px;
-      padding: 0 22px;
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.2s;
+    .src-load-btn:active { transform: scale(0.96); }
+
+    /* Audio player */
+    .audio-player {
+      margin-top: 18px; background: rgba(7, 9, 26, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px; padding: 20px; display: none;
     }
-    .url-load-btn:active { transform: scale(0.96); }
-    .url-load-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+    .audio-player.visible { display: block; }
+    .audio-player-row { display: flex; align-items: center; gap: 16px; }
+    .play-btn {
+      width: 56px; height: 56px; flex-shrink: 0;
+      border-radius: 50%; background: var(--glow); color: var(--bg-deep);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s; box-shadow: 0 0 20px var(--glow-soft);
+    }
+    .play-btn:active { transform: scale(0.94); }
+    .play-btn svg { width: 22px; height: 22px; fill: currentColor; }
+    .audio-info { flex: 1; min-width: 0; }
+    .audio-name {
+      font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 6px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .audio-meta { font-size: 13px; color: var(--ink-dim); font-feature-settings: 'tnum'; }
+    .audio-progress {
+      margin-top: 14px; height: 4px;
+      background: rgba(255, 255, 255, 0.08); border-radius: 2px; overflow: hidden;
+    }
+    .audio-progress-fill {
+      height: 100%; background: var(--glow); width: 0%;
+      transition: width 0.2s linear; box-shadow: 0 0 8px var(--glow-soft);
     }
 
+    /* YouTube */
     .player-frame {
-      margin-top: 18px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #000;
-      aspect-ratio: 16 / 9;
-      display: none;
+      margin-top: 18px; border-radius: 16px; overflow: hidden;
+      background: #000; aspect-ratio: 16 / 9; display: none;
+      touch-action: pan-y; position: relative;
     }
     .player-frame.visible { display: block; }
     #player { width: 100%; height: 100%; }
-
     .video-title {
-      margin-top: 12px;
-      font-family: var(--serif);
-      font-size: 17px;
-      font-weight: 400;
-      color: var(--ink);
-      line-height: 1.4;
-      display: none;
+      margin-top: 12px; font-family: var(--serif); font-size: 17px;
+      color: var(--ink); line-height: 1.4; display: none;
     }
     .video-title.visible { display: block; }
 
-    /* ---------- PRESET CHIPS ---------- */
-    .chips {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
-      gap: 10px;
-    }
+    /* Chips */
+    .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)); gap: 10px; }
     .chip {
       background: rgba(7, 9, 26, 0.55);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
-      padding: 16px 8px;
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      text-align: center;
+      border-radius: 14px; padding: 16px 8px;
+      color: var(--ink); font-family: var(--sans);
+      font-size: 16px; font-weight: 500;
+      cursor: pointer; transition: all 0.18s ease; text-align: center;
     }
     .chip:active { transform: scale(0.96); }
     .chip.active {
@@ -240,142 +178,91 @@
       box-shadow: 0 0 0 1px var(--glow-line) inset;
     }
     .chip-unit {
-      display: block;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-top: 2px;
+      display: block; font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-faint); margin-top: 2px;
     }
     .chip.active .chip-unit { color: var(--glow); opacity: 0.7; }
 
-    .custom-row {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+    .custom-row { margin-top: 12px; display: flex; gap: 10px; }
     .custom-input {
-      flex: 1;
-      background: rgba(7, 9, 26, 0.5);
+      flex: 1; background: rgba(7, 9, 26, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 15px;
-      min-width: 0;
+      border-radius: 12px; padding: 12px 14px;
+      color: var(--ink); font-family: var(--sans); font-size: 15px; min-width: 0;
     }
-    .custom-input:focus {
-      outline: none;
-      border-color: var(--glow-line);
-    }
+    .custom-input:focus { outline: none; border-color: var(--glow-line); }
 
-    /* ---------- FADE SLIDER ---------- */
-    .slider-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    /* Slider */
+    .slider-wrap { display: flex; flex-direction: column; gap: 14px; }
     .slider-readout {
-      font-family: var(--serif);
-      font-size: 36px;
-      font-weight: 300;
-      color: var(--glow);
-      font-feature-settings: 'tnum';
+      font-family: var(--serif); font-size: 36px; font-weight: 300;
+      color: var(--glow); font-feature-settings: 'tnum';
     }
     .slider-readout small {
-      font-family: var(--sans);
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink-dim);
-      margin-left: 8px;
-      font-weight: 500;
+      font-family: var(--sans); font-size: 13px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink-dim); margin-left: 8px; font-weight: 500;
     }
     input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 3px;
-      outline: none;
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px;
+      background: rgba(255, 255, 255, 0.08); border-radius: 3px; outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--glow);
-      cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--glow); cursor: pointer;
       box-shadow: 0 0 16px var(--glow-soft), 0 2px 6px rgba(0,0,0,0.4);
     }
     input[type="range"]::-moz-range-thumb {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--glow);
-      cursor: pointer;
-      border: none;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--glow); cursor: pointer; border: none;
       box-shadow: 0 0 16px var(--glow-soft), 0 2px 6px rgba(0,0,0,0.4);
     }
 
-    /* ---------- START BUTTON ---------- */
     .start-btn {
-      width: 100%;
-      padding: 22px;
+      width: 100%; padding: 22px;
       background: linear-gradient(180deg, var(--glow), #d9a955);
-      color: var(--bg-deep);
-      border: none;
-      border-radius: 18px;
-      font-family: var(--serif);
-      font-weight: 400;
-      font-size: 22px;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      color: var(--bg-deep); border: none; border-radius: 18px;
+      font-family: var(--serif); font-weight: 400;
+      font-size: 22px; letter-spacing: 0.02em;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
       box-shadow: 0 8px 32px rgba(245, 201, 122, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       margin-top: 8px;
     }
     .start-btn:active { transform: scale(0.98); }
-    .start-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+    .start-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
     .start-btn em { font-style: italic; }
 
-    .hint {
-      text-align: center;
-      color: var(--ink-faint);
-      font-size: 13px;
-      margin-top: 14px;
-      line-height: 1.5;
-    }
-
-    /* ---------- RUNNING SCREEN ---------- */
-    #running-screen {
-      max-width: 540px;
-      text-align: center;
-      padding: 40px 28px;
-    }
-    .running-status {
-      font-size: 13px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+    .test-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 14px;
+      background: transparent;
+      border: 1px dashed rgba(245, 201, 122, 0.3);
+      border-radius: 14px;
       color: var(--ink-dim);
-      margin-bottom: 24px;
+      font-family: var(--sans);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .test-btn:active { transform: scale(0.98); background: rgba(245, 201, 122, 0.05); }
+    .test-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .hint { text-align: center; color: var(--ink-faint); font-size: 13px; margin-top: 14px; line-height: 1.5; }
+    .error-msg { color: var(--danger); font-size: 14px; margin-top: 10px; min-height: 1.2em; }
+
+    #running-screen { max-width: 540px; text-align: center; padding: 40px 28px; }
+    .running-status {
+      font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink-dim); margin-bottom: 24px;
     }
     .running-status .dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--glow);
-      margin-right: 8px;
-      vertical-align: middle;
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--glow);
+      margin-right: 8px; vertical-align: middle;
       animation: pulse 2.4s ease-in-out infinite;
       box-shadow: 0 0 12px var(--glow-line);
     }
@@ -383,93 +270,39 @@
       0%, 100% { opacity: 0.4; transform: scale(0.85); }
       50% { opacity: 1; transform: scale(1.1); }
     }
-
     .countdown {
-      font-family: var(--serif);
-      font-weight: 300;
+      font-family: var(--serif); font-weight: 300;
       font-size: clamp(80px, 22vw, 180px);
-      line-height: 1;
-      letter-spacing: -0.02em;
+      line-height: 1; letter-spacing: -0.02em;
       font-feature-settings: 'tnum';
-      color: var(--ink);
-      margin-bottom: 16px;
+      color: var(--ink); margin-bottom: 16px;
       transition: color 0.6s ease;
     }
     .countdown.fading { color: var(--glow); }
-
     .running-sub {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 18px;
-      color: var(--ink-dim);
-      margin-bottom: 40px;
-      min-height: 1.4em;
+      font-family: var(--serif); font-style: italic; font-size: 18px;
+      color: var(--ink-dim); margin-bottom: 40px; min-height: 1.4em;
     }
-
-    .running-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 320px;
-      margin: 0 auto;
-    }
+    .running-actions { display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 0 auto; }
     .secondary-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 14px;
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
+      background: transparent; border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px; padding: 14px;
+      color: var(--ink); font-family: var(--sans);
+      font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
     }
     .secondary-btn:active { background: rgba(255, 255, 255, 0.04); }
-    .cancel-btn {
-      color: var(--danger);
-      border-color: rgba(229, 138, 138, 0.3);
-    }
+    .cancel-btn { color: var(--danger); border-color: rgba(229, 138, 138, 0.3); }
 
-    .mini-player {
-      position: fixed;
-      width: 1px;
-      height: 1px;
-      bottom: 0;
-      right: 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ---------- DONE SCREEN ---------- */
-    #done-screen {
-      max-width: 480px;
-      text-align: center;
-    }
+    #done-screen { max-width: 480px; text-align: center; }
     .done-title {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(36px, 7vw, 56px);
-      margin-bottom: 14px;
-      color: var(--ink);
+      font-family: var(--serif); font-style: italic; font-weight: 300;
+      font-size: clamp(36px, 7vw, 56px); margin-bottom: 14px; color: var(--ink);
     }
-    .done-sub {
-      color: var(--ink-dim);
-      font-size: 16px;
-      margin-bottom: 36px;
-    }
-
-    /* ---------- ERROR ---------- */
-    .error-msg {
-      color: var(--danger);
-      font-size: 14px;
-      margin-top: 10px;
-      min-height: 1.2em;
-    }
+    .done-sub { color: var(--ink-dim); font-size: 16px; margin-bottom: 36px; }
 
     @media (max-width: 480px) {
-      .screen { padding: 20px 18px; }
+      .screen { padding: 0 18px; }
       .card { padding: 22px 20px; }
       .brand-text { font-size: 24px; }
     }
@@ -477,29 +310,46 @@
 </head>
 <body>
 
-  <!-- SETUP SCREEN -->
   <div id="setup-screen" class="screen">
     <div class="brand">
       <div class="brand-mark"></div>
       <div class="brand-text">Lullaby<em>.</em></div>
     </div>
 
-    <div class="card">
-      <div class="label">YouTube link</div>
-      <div class="url-row">
-        <input
-          type="url"
-          class="url-input"
-          id="urlInput"
-          placeholder="Paste a YouTube URL"
-          value="https://youtu.be/yLuEx-XH3Uc"
-          autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-        />
-        <button class="url-load-btn" id="loadBtn">Load</button>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="audio">Audio file</button>
+      <button class="mode-btn" data-mode="youtube">YouTube</button>
+    </div>
+
+    <div class="card" id="audioCard">
+      <div class="label">Audio file</div>
+      <div class="src-row">
+        <input type="text" class="src-input" id="audioSrcInput" placeholder="lullaby.mp3" value="lullaby.mp3" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <button class="src-load-btn" id="audioLoadBtn">Load</button>
       </div>
-      <div class="error-msg" id="errorMsg"></div>
+      <div class="error-msg" id="audioError"></div>
+      <div class="audio-player" id="audioPlayer">
+        <div class="audio-player-row">
+          <button class="play-btn" id="playBtn" aria-label="Play">
+            <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="audio-info">
+            <div class="audio-name" id="audioName">—</div>
+            <div class="audio-meta" id="audioMeta">0:00 / 0:00</div>
+          </div>
+        </div>
+        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgress"></div></div>
+      </div>
+      <audio id="audioEl" preload="auto" loop playsinline></audio>
+    </div>
+
+    <div class="card hidden" id="youtubeCard">
+      <div class="label">YouTube link</div>
+      <div class="src-row">
+        <input type="url" class="src-input" id="ytSrcInput" placeholder="Paste a YouTube URL" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <button class="src-load-btn" id="ytLoadBtn">Load</button>
+      </div>
+      <div class="error-msg" id="ytError"></div>
       <div class="player-frame" id="playerFrame">
         <div id="player"></div>
       </div>
@@ -516,33 +366,23 @@
         <button class="chip" data-min="90">90<span class="chip-unit">min</span></button>
       </div>
       <div class="custom-row">
-        <input
-          type="number"
-          class="custom-input"
-          id="customMin"
-          placeholder="Custom (minutes)"
-          min="1"
-          max="480"
-          inputmode="numeric"
-        />
+        <input type="number" class="custom-input" id="customMin" placeholder="Custom (minutes)" min="1" max="480" inputmode="numeric" />
       </div>
     </div>
 
     <div class="card">
       <div class="label">Fade out duration</div>
       <div class="slider-wrap">
-        <div class="slider-readout">
-          <span id="fadeReadout">15</span><small>seconds</small>
-        </div>
+        <div class="slider-readout"><span id="fadeReadout">15</span><small>seconds</small></div>
         <input type="range" id="fadeSlider" min="10" max="30" value="15" step="1" />
       </div>
     </div>
 
     <button class="start-btn" id="startBtn" disabled>Begin <em>lullaby</em></button>
-    <p class="hint">Keep this tab open and the iPad screen on. Lower brightness all the way for a dark room.</p>
+    <button class="test-btn" id="testBtn" disabled>Run a quick test &middot; 1 min</button>
+    <p class="hint" id="hintText">Keep this tab open and the screen on. Lower brightness all the way for a dark room.</p>
   </div>
 
-  <!-- RUNNING SCREEN -->
   <div id="running-screen" class="screen hidden">
     <div class="running-status"><span class="dot"></span><span id="runStatus">Playing</span></div>
     <div class="countdown" id="countdown">30:00</div>
@@ -553,7 +393,6 @@
     </div>
   </div>
 
-  <!-- DONE SCREEN -->
   <div id="done-screen" class="screen hidden">
     <div class="brand" style="justify-content: center;">
       <div class="brand-mark" style="opacity: 0.5"></div>
@@ -567,243 +406,293 @@
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
+    const $ = (id) => document.getElementById(id);
+
     // ---------- STATE ----------
-    let player = null;
-    let playerReady = false;
-    let videoLoaded = false;
+    let mode = localStorage.getItem('lullaby.mode') || 'audio';
     let timerMin = 30;
     let fadeSec = 15;
     let timerEndTime = null;
     let fadeStartTime = null;
-    let originalVolume = 100;
     let rafId = null;
     let wakeLock = null;
 
-    // ---------- ELEMENTS ----------
-    const $ = (id) => document.getElementById(id);
-    const setupScreen = $('setup-screen');
-    const runningScreen = $('running-screen');
-    const doneScreen = $('done-screen');
-    const urlInput = $('urlInput');
-    const loadBtn = $('loadBtn');
-    const errorMsg = $('errorMsg');
-    const playerFrame = $('playerFrame');
-    const videoTitle = $('videoTitle');
-    const presetChips = $('presetChips');
-    const customMin = $('customMin');
-    const fadeSlider = $('fadeSlider');
-    const fadeReadout = $('fadeReadout');
-    const startBtn = $('startBtn');
-    const countdown = $('countdown');
-    const runSub = $('runSub');
-    const runStatus = $('runStatus');
-    const addFiveBtn = $('addFiveBtn');
-    const cancelBtn = $('cancelBtn');
-    const restartBtn = $('restartBtn');
+    const audioEl = $('audioEl');
+    let audioContext = null, gainNode = null, audioSource = null;
+    let audioLoaded = false;
 
-    // ---------- VIDEO ID PARSING ----------
+    let ytPlayer = null, ytReady = false, ytLoaded = false, ytCurrentRate = 1;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    // ---------- MODE TOGGLE ----------
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+    });
+
+    function switchMode(m) {
+      mode = m;
+      localStorage.setItem('lullaby.mode', mode);
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
+      });
+      $('audioCard').classList.toggle('hidden', mode !== 'audio');
+      $('youtubeCard').classList.toggle('hidden', mode !== 'youtube');
+      updateStartButton();
+      updateHint();
+    }
+
+    function updateHint() {
+      const hint = $('hintText');
+      if (mode === 'youtube' && isIOS) {
+        hint.textContent = 'iOS note: in YouTube mode, fade slows playback (volume control isn\u2019t allowed). Use Audio file mode for smooth volume fade.';
+      } else {
+        hint.textContent = 'Keep this tab open and the screen on. Lower brightness all the way for a dark room.';
+      }
+    }
+
+    function updateStartButton() {
+      const ready = (mode === 'audio' && audioLoaded) || (mode === 'youtube' && ytLoaded);
+      $('startBtn').disabled = !ready;
+      $('testBtn').disabled = !ready;
+    }
+
+    switchMode(mode);
+
+    // ---------- AUDIO MODE ----------
+    function ensureAudioContext() {
+      if (audioContext) return;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      audioContext = new Ctx();
+      gainNode = audioContext.createGain();
+      gainNode.gain.value = 1;
+      audioSource = audioContext.createMediaElementSource(audioEl);
+      audioSource.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+    }
+
+    $('audioLoadBtn').addEventListener('click', loadAudio);
+    $('audioSrcInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); loadAudio(); }
+    });
+
+    function loadAudio() {
+      const src = $('audioSrcInput').value.trim();
+      if (!src) { $('audioError').textContent = 'Enter a filename or URL.'; return; }
+      $('audioError').textContent = '';
+      audioEl.src = src;
+      audioEl.load();
+      audioLoaded = true;
+      $('audioPlayer').classList.add('visible');
+      $('audioName').textContent = src.split('/').pop();
+      updateStartButton();
+    }
+
+    audioEl.addEventListener('error', () => {
+      $('audioError').textContent = 'Couldn\u2019t load that file. Check the filename and that it\u2019s in the same folder as index.html.';
+      audioLoaded = false;
+      $('audioPlayer').classList.remove('visible');
+      updateStartButton();
+    });
+
+    audioEl.addEventListener('loadedmetadata', updateAudioMeta);
+    audioEl.addEventListener('timeupdate', () => {
+      updateAudioMeta();
+      if (audioEl.duration) {
+        $('audioProgress').style.width = (audioEl.currentTime / audioEl.duration * 100) + '%';
+      }
+    });
+    audioEl.addEventListener('play', () => {
+      $('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+    });
+    audioEl.addEventListener('pause', () => {
+      $('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+    });
+
+    $('playBtn').addEventListener('click', async () => {
+      ensureAudioContext();
+      if (audioContext.state === 'suspended') await audioContext.resume();
+      if (audioEl.paused) {
+        try { await audioEl.play(); } catch (e) { $('audioError').textContent = 'Tap again to play.'; }
+      } else {
+        audioEl.pause();
+      }
+    });
+
+    function updateAudioMeta() {
+      $('audioMeta').textContent = `${formatSec(audioEl.currentTime || 0)} / ${formatSec(audioEl.duration || 0)}`;
+    }
+    function formatSec(s) {
+      if (!isFinite(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    loadAudio();
+
+    // ---------- YOUTUBE MODE ----------
     function extractVideoId(url) {
       if (!url) return null;
       url = url.trim();
-      // Already an 11-char ID?
       if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
       try {
         const u = new URL(url);
-        // youtu.be/<id>
-        if (u.hostname.includes('youtu.be')) {
-          return u.pathname.slice(1).split('/')[0] || null;
-        }
-        // youtube.com/watch?v=<id>
+        if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('/')[0] || null;
         if (u.searchParams.get('v')) return u.searchParams.get('v');
-        // youtube.com/embed/<id> or /shorts/<id> or /live/<id>
         const m = u.pathname.match(/\/(embed|shorts|live|v)\/([A-Za-z0-9_-]{11})/);
         if (m) return m[2];
-      } catch (e) { /* fallthrough */ }
-      // Last resort: regex on raw string
+      } catch (e) {}
       const m = url.match(/[A-Za-z0-9_-]{11}/);
       return m ? m[0] : null;
     }
 
-    // ---------- YOUTUBE API ----------
-    const DEFAULT_VIDEO_ID = 'yLuEx-XH3Uc';
-
-    function onYouTubeIframeAPIReady() {
-      const initialId = extractVideoId(urlInput.value) || DEFAULT_VIDEO_ID;
-      player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        videoId: initialId,
-        playerVars: {
-          'playsinline': 1,
-          'rel': 0,
-          'modestbranding': 1,
-          'iv_load_policy': 3
-        },
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('player', {
+        height: '100%', width: '100%',
+        videoId: 'yLuEx-XH3Uc',
+        playerVars: { playsinline: 1, rel: 0, modestbranding: 1, iv_load_policy: 3 },
         events: {
-          'onReady': () => {
-            playerReady = true;
-            // Show the player frame since we already have a video loaded
-            playerFrame.classList.add('visible');
-            videoTitle.classList.add('visible');
-            videoTitle.textContent = 'Tap play in the video, then begin the lullaby below.';
-            videoLoaded = true;
+          onReady: () => {
+            ytReady = true;
+            $('playerFrame').classList.add('visible');
+            $('videoTitle').classList.add('visible');
+            $('videoTitle').textContent = 'Tap play in the video, then begin the lullaby below.';
+            ytLoaded = true;
             updateStartButton();
           },
-          'onStateChange': onPlayerStateChange,
-          'onError': onPlayerError
+          onError: (e) => {
+            let msg = 'YouTube couldn\u2019t play this video.';
+            if (e.data === 101 || e.data === 150) msg = 'This video\u2019s owner blocked embedding.';
+            else if (e.data === 100) msg = 'Video not found, removed, or private.';
+            else if (e.data === 2) msg = 'Invalid YouTube URL.';
+            $('ytError').textContent = msg;
+            ytLoaded = false;
+            $('playerFrame').classList.remove('visible');
+            updateStartButton();
+          }
         }
       });
-    }
-    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+    };
 
-    function onPlayerStateChange(e) {
-      // YT.PlayerState.PLAYING = 1
-      if (e.data === YT.PlayerState.PLAYING && timerEndTime) {
-        runStatus.textContent = 'Playing';
-      } else if (e.data === YT.PlayerState.PAUSED && timerEndTime) {
-        runStatus.textContent = 'Paused';
-      }
-    }
-
-    function onPlayerError(e) {
-      // Error codes: 101 and 150 = embedding disabled by uploader
-      // 100 = video not found / private, 2 = invalid ID, 5 = HTML5 player error
-      let msg;
-      if (e.data === 101 || e.data === 150) {
-        msg = 'This video\u2019s owner blocked embedding. Try a different upload of the same content.';
-      } else if (e.data === 100) {
-        msg = 'Video not found, removed, or private.';
-      } else if (e.data === 2) {
-        msg = 'That URL doesn\u2019t look like a valid YouTube video.';
-      } else {
-        msg = 'YouTube couldn\u2019t play this video here. Try another link.';
-      }
-      showError(msg, true);
-      videoLoaded = false;
-      playerFrame.classList.remove('visible');
-      videoTitle.classList.remove('visible');
-      updateStartButton();
-    }
-
-    function showError(msg, sticky = false) {
-      errorMsg.textContent = msg;
-      if (!sticky) {
-        setTimeout(() => { if (errorMsg.textContent === msg) errorMsg.textContent = ''; }, 4000);
-      }
-    }
-
-    // ---------- LOAD VIDEO ----------
-    loadBtn.addEventListener('click', loadVideo);
-    urlInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); loadVideo(); }
+    $('ytLoadBtn').addEventListener('click', loadYouTube);
+    $('ytSrcInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); loadYouTube(); }
     });
 
-    function loadVideo() {
-      const id = extractVideoId(urlInput.value);
-      if (!id) {
-        showError('Couldn\u2019t find a video ID in that link.');
-        return;
-      }
-      if (!playerReady) {
-        showError('Player still loading\u2026 try again in a second.');
-        return;
-      }
-      errorMsg.textContent = '';
-      player.cueVideoById(id);
-      playerFrame.classList.add('visible');
-      videoTitle.classList.add('visible');
-      videoTitle.textContent = 'Tap play in the video, then begin the lullaby below.';
-      videoLoaded = true;
+    function loadYouTube() {
+      const id = extractVideoId($('ytSrcInput').value);
+      if (!id) { $('ytError').textContent = 'Couldn\u2019t find a video ID in that link.'; return; }
+      if (!ytReady) { $('ytError').textContent = 'Player still loading...'; return; }
+      $('ytError').textContent = '';
+      ytPlayer.cueVideoById(id);
+      $('playerFrame').classList.add('visible');
+      $('videoTitle').classList.add('visible');
+      $('videoTitle').textContent = 'Tap play in the video, then begin the lullaby below.';
+      ytLoaded = true;
       updateStartButton();
     }
 
-    // ---------- PRESET CHIPS ----------
-    presetChips.addEventListener('click', (e) => {
+    // ---------- PRESETS / SLIDER ----------
+    $('presetChips').addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
       if (!chip) return;
-      [...presetChips.children].forEach(c => c.classList.remove('active'));
+      [...$('presetChips').children].forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       timerMin = parseInt(chip.dataset.min, 10);
-      customMin.value = '';
+      $('customMin').value = '';
     });
 
-    customMin.addEventListener('input', () => {
-      const v = parseInt(customMin.value, 10);
+    $('customMin').addEventListener('input', () => {
+      const v = parseInt($('customMin').value, 10);
       if (!isNaN(v) && v > 0) {
         timerMin = v;
-        [...presetChips.children].forEach(c => c.classList.remove('active'));
+        [...$('presetChips').children].forEach(c => c.classList.remove('active'));
       }
     });
 
-    // ---------- FADE SLIDER ----------
-    fadeSlider.addEventListener('input', () => {
-      fadeSec = parseInt(fadeSlider.value, 10);
-      fadeReadout.textContent = fadeSec;
+    $('fadeSlider').addEventListener('input', () => {
+      fadeSec = parseInt($('fadeSlider').value, 10);
+      $('fadeReadout').textContent = fadeSec;
     });
 
-    function updateStartButton() {
-      startBtn.disabled = !videoLoaded;
-    }
+    // ---------- START / RUN / FINISH ----------
+    $('startBtn').addEventListener('click', () => startTimer(timerMin));
+    $('testBtn').addEventListener('click', () => startTimer(1));
 
-    // ---------- START ----------
-    startBtn.addEventListener('click', startTimer);
-
-    async function startTimer() {
-      if (!videoLoaded || !playerReady) return;
-
-      // Make sure video is playing
-      try {
-        player.unMute();
-        originalVolume = 100;
-        player.setVolume(originalVolume);
-        player.playVideo();
-      } catch (err) {
-        showError('Could not start playback.');
-        return;
+    async function startTimer(durationMin) {
+      if (mode === 'audio') {
+        if (!audioLoaded) return;
+        ensureAudioContext();
+        if (audioContext.state === 'suspended') await audioContext.resume();
+        gainNode.gain.value = 1;
+        try { await audioEl.play(); }
+        catch (e) {
+          $('audioError').textContent = 'Tap the play button first, then Begin.';
+          return;
+        }
+      } else {
+        if (!ytLoaded || !ytReady) return;
+        try {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+          ytPlayer.setPlaybackRate(1);
+          ytPlayer.playVideo();
+          ytCurrentRate = 1;
+        } catch (e) { $('ytError').textContent = 'Could not start playback.'; return; }
       }
 
-      const totalMs = timerMin * 60 * 1000;
+      const totalMs = durationMin * 60 * 1000;
       timerEndTime = Date.now() + totalMs;
       fadeStartTime = timerEndTime - (fadeSec * 1000);
 
-      setupScreen.classList.add('hidden');
-      doneScreen.classList.add('hidden');
-      runningScreen.classList.remove('hidden');
+      $('setup-screen').classList.add('hidden');
+      $('done-screen').classList.add('hidden');
+      $('running-screen').classList.remove('hidden');
       document.body.classList.add('timer-running');
-      runStatus.textContent = 'Playing';
-      runSub.textContent = 'until silence';
-      countdown.classList.remove('fading');
+      $('runStatus').textContent = 'Playing';
+      $('runSub').textContent = 'until silence';
+      $('countdown').classList.remove('fading');
 
       requestWakeLock();
       tickLoop();
     }
 
-    // ---------- TICK / FADE LOOP ----------
     function tickLoop() {
       const now = Date.now();
       const remaining = timerEndTime - now;
 
-      if (remaining <= 0) {
-        finishTimer();
-        return;
-      }
+      if (remaining <= 0) { finishTimer(); return; }
 
-      // Update countdown text
-      countdown.textContent = formatTime(remaining);
+      $('countdown').textContent = formatTime(remaining);
 
-      // Fade phase
       if (now >= fadeStartTime) {
         const fadeElapsed = now - fadeStartTime;
         const fadeTotal = timerEndTime - fadeStartTime;
         const progress = Math.min(1, Math.max(0, fadeElapsed / fadeTotal));
-        // Ease-in quadratic curve: gentle at first, then accelerates.
-        // Sounds more natural than linear because perceived loudness is roughly logarithmic.
-        const remainingFraction = (1 - progress) * (1 - progress);
-        const newVolume = Math.max(0, Math.round(originalVolume * remainingFraction));
-        try { player.setVolume(newVolume); } catch (e) {}
-        countdown.classList.add('fading');
-        runSub.textContent = 'fading to silence\u2026';
-        runStatus.textContent = 'Fading';
+        const remainingFraction = (1 - progress) * (1 - progress); // quadratic ease
+
+        if (mode === 'audio') {
+          if (gainNode) gainNode.gain.value = remainingFraction;
+        } else {
+          if (isIOS) {
+            const rates = [1, 0.75, 0.5, 0.25];
+            const idx = Math.min(rates.length - 1, Math.floor(progress * rates.length));
+            const targetRate = rates[idx];
+            if (ytCurrentRate !== targetRate) {
+              try { ytPlayer.setPlaybackRate(targetRate); } catch (e) {}
+              ytCurrentRate = targetRate;
+            }
+          } else {
+            const newVolume = Math.max(0, Math.round(100 * remainingFraction));
+            try { ytPlayer.setVolume(newVolume); } catch (e) {}
+          }
+        }
+
+        $('countdown').classList.add('fading');
+        $('runSub').textContent = 'fading to silence\u2026';
+        $('runStatus').textContent = 'Fading';
       }
 
       rafId = requestAnimationFrame(tickLoop);
@@ -811,59 +700,72 @@
 
     function formatTime(ms) {
       const totalSec = Math.ceil(ms / 1000);
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
+      return `${Math.floor(totalSec / 60)}:${(totalSec % 60).toString().padStart(2, '0')}`;
     }
 
     function finishTimer() {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = null;
-      try {
-        player.setVolume(0);
-        player.pauseVideo();
-      } catch (e) {}
+      if (mode === 'audio') {
+        try {
+          if (gainNode) gainNode.gain.value = 0;
+          audioEl.pause();
+          audioEl.currentTime = 0;
+          if (gainNode) gainNode.gain.value = 1;
+        } catch (e) {}
+      } else {
+        try {
+          ytPlayer.mute();
+          ytPlayer.pauseVideo();
+          ytPlayer.setPlaybackRate(1);
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+        } catch (e) {}
+        ytCurrentRate = 1;
+      }
       timerEndTime = null;
       fadeStartTime = null;
       releaseWakeLock();
       document.body.classList.remove('timer-running');
-
-      runningScreen.classList.add('hidden');
-      doneScreen.classList.remove('hidden');
+      $('running-screen').classList.add('hidden');
+      $('done-screen').classList.remove('hidden');
     }
 
-    // ---------- ADD TIME / CANCEL ----------
-    addFiveBtn.addEventListener('click', () => {
+    $('addFiveBtn').addEventListener('click', () => {
       if (!timerEndTime) return;
       timerEndTime += 5 * 60 * 1000;
       fadeStartTime = timerEndTime - (fadeSec * 1000);
-      // If we were in fade phase, restore volume
-      try {
-        player.setVolume(originalVolume);
-      } catch (e) {}
-      countdown.classList.remove('fading');
-      runSub.textContent = 'until silence';
-      runStatus.textContent = 'Playing';
+      if (mode === 'audio') {
+        if (gainNode) gainNode.gain.value = 1;
+      } else {
+        try { ytPlayer.setVolume(100); ytPlayer.setPlaybackRate(1); } catch (e) {}
+        ytCurrentRate = 1;
+      }
+      $('countdown').classList.remove('fading');
+      $('runSub').textContent = 'until silence';
+      $('runStatus').textContent = 'Playing';
     });
 
-    cancelBtn.addEventListener('click', () => {
+    $('cancelBtn').addEventListener('click', () => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = null;
-      try {
-        player.setVolume(originalVolume);
-        player.pauseVideo();
-      } catch (e) {}
+      if (mode === 'audio') {
+        try { audioEl.pause(); if (gainNode) gainNode.gain.value = 1; } catch (e) {}
+      } else {
+        try { ytPlayer.setVolume(100); ytPlayer.setPlaybackRate(1); ytPlayer.pauseVideo(); } catch (e) {}
+        ytCurrentRate = 1;
+      }
       timerEndTime = null;
       fadeStartTime = null;
       releaseWakeLock();
       document.body.classList.remove('timer-running');
-      runningScreen.classList.add('hidden');
-      setupScreen.classList.remove('hidden');
+      $('running-screen').classList.add('hidden');
+      $('setup-screen').classList.remove('hidden');
     });
 
-    restartBtn.addEventListener('click', () => {
-      doneScreen.classList.add('hidden');
-      setupScreen.classList.remove('hidden');
+    $('restartBtn').addEventListener('click', () => {
+      $('done-screen').classList.add('hidden');
+      $('setup-screen').classList.remove('hidden');
     });
 
     // ---------- WAKE LOCK ----------
@@ -873,7 +775,7 @@
           wakeLock = await navigator.wakeLock.request('screen');
           document.addEventListener('visibilitychange', handleVisibilityChange);
         }
-      } catch (e) { /* not critical */ }
+      } catch (e) {}
     }
     async function releaseWakeLock() {
       try {
