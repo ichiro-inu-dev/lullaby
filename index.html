@@ -610,11 +610,14 @@
     }
 
     // ---------- YOUTUBE API ----------
+    const DEFAULT_VIDEO_ID = 'yLuEx-XH3Uc';
+
     function onYouTubeIframeAPIReady() {
+      const initialId = extractVideoId(urlInput.value) || DEFAULT_VIDEO_ID;
       player = new YT.Player('player', {
         height: '100%',
         width: '100%',
-        videoId: '',
+        videoId: initialId,
         playerVars: {
           'playsinline': 1,
           'rel': 0,
@@ -624,10 +627,12 @@
         events: {
           'onReady': () => {
             playerReady = true;
-            // Auto-load whatever URL is in the input on launch
-            if (urlInput.value.trim()) {
-              loadVideo();
-            }
+            // Show the player frame since we already have a video loaded
+            playerFrame.classList.add('visible');
+            videoTitle.classList.add('visible');
+            videoTitle.textContent = 'Tap play in the video, then begin the lullaby below.';
+            videoLoaded = true;
+            updateStartButton();
           },
           'onStateChange': onPlayerStateChange,
           'onError': onPlayerError
