@@ -29,10 +29,13 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
     html, body {
-      min-height: 100%;
       overflow-x: hidden;
-      overscroll-behavior: none;
+      overscroll-behavior-y: none;
     }
 
     body {
@@ -44,20 +47,19 @@
         linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 100%);
       background-attachment: fixed;
       min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 32px env(safe-area-inset-right) max(32px, env(safe-area-inset-bottom)) env(safe-area-inset-left);
+      padding: 32px env(safe-area-inset-right) max(48px, env(safe-area-inset-bottom)) env(safe-area-inset-left);
       position: relative;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Lock scroll only when timer is running, so the running screen stays put */
     body.timer-running {
       overflow: hidden;
       height: 100vh;
+      padding: 0;
     }
     body.timer-running #running-screen {
-      min-height: calc(100vh - 64px);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -83,7 +85,8 @@
     .screen {
       width: 100%;
       max-width: 720px;
-      padding: 32px 28px;
+      margin: 0 auto;
+      padding: 0 28px;
       position: relative;
       z-index: 1;
     }
