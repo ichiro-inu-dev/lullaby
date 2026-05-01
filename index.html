@@ -30,8 +30,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     html, body {
-      height: 100%;
-      overflow: hidden;
+      min-height: 100%;
+      overflow-x: hidden;
       overscroll-behavior: none;
     }
 
@@ -45,10 +45,22 @@
       background-attachment: fixed;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      padding: 32px env(safe-area-inset-right) max(32px, env(safe-area-inset-bottom)) env(safe-area-inset-left);
       position: relative;
+    }
+
+    /* Lock scroll only when timer is running, so the running screen stays put */
+    body.timer-running {
+      overflow: hidden;
+      height: 100vh;
+    }
+    body.timer-running #running-screen {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     /* Subtle starfield grain */
@@ -754,6 +766,7 @@
       setupScreen.classList.add('hidden');
       doneScreen.classList.add('hidden');
       runningScreen.classList.remove('hidden');
+      document.body.classList.add('timer-running');
       runStatus.textContent = 'Playing';
       runSub.textContent = 'until silence';
       countdown.classList.remove('fading');
@@ -810,6 +823,7 @@
       timerEndTime = null;
       fadeStartTime = null;
       releaseWakeLock();
+      document.body.classList.remove('timer-running');
 
       runningScreen.classList.add('hidden');
       doneScreen.classList.remove('hidden');
@@ -839,6 +853,7 @@
       timerEndTime = null;
       fadeStartTime = null;
       releaseWakeLock();
+      document.body.classList.remove('timer-running');
       runningScreen.classList.add('hidden');
       setupScreen.classList.remove('hidden');
     });
