@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)file:///Users/jgray/Downloads/lullaby-sleep-timer.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lullaby">
+  <meta name="theme-color" content="#0c1129">
+  <title>Lullaby — Sleep Timer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./index_files/css2" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #07091a;
+      --bg-mid: #0c1129;
+      --bg-soft: #161b3d;
+      --ink: #f4ecdc;
+      --ink-dim: rgba(244, 236, 220, 0.62);
+      --ink-faint: rgba(244, 236, 220, 0.32);
+      --glow: #f5c97a;
+      --glow-soft: rgba(245, 201, 122, 0.18);
+      --glow-line: rgba(245, 201, 122, 0.45);
+      --danger: #e58a8a;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 90% 60% at 30% 0%, rgba(98, 87, 161, 0.35), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 80% 100%, rgba(245, 201, 122, 0.10), transparent 55%),
+        linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      position: relative;
+    }
+
+    /* Subtle starfield grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 78% 42%, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1px 1px at 38% 72%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 62% 88%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 88% 22%, rgba(255,255,255,0.45), transparent),
+        radial-gradient(1px 1px at 22% 58%, rgba(255,255,255,0.35), transparent);
+      opacity: 0.6;
+      z-index: 0;
+    }
+
+    .screen {
+      width: 100%;
+      max-width: 720px;
+      padding: 32px 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ---------- HEADER ---------- */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff5db, var(--glow));
+      box-shadow: 0 0 24px var(--glow-soft), inset -6px -8px 12px rgba(120, 80, 20, 0.35);
+      position: relative;
+    }
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      top: 4px; right: 2px;
+      border-radius: 50%;
+      background: var(--bg-mid);
+      box-shadow: 0 0 10px var(--bg-mid);
+    }
+    .brand-text {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 28px;
+      letter-spacing: 0.01em;
+    }
+    .brand-text em {
+      font-style: italic;
+      color: var(--glow);
+      font-weight: 300;
+    }
+
+    /* ---------- CARD ---------- */
+    .card {
+      background: rgba(22, 27, 61, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    .label {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 14px;
+    }
+
+    /* ---------- URL INPUT ---------- */
+    .url-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .url-input {
+      flex: 1;
+      background: rgba(7, 9, 26, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 18px;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      transition: border-color 0.2s, background 0.2s;
+      min-width: 0;
+    }
+    .url-input::placeholder { color: var(--ink-faint); }
+    .url-input:focus {
+      outline: none;
+      border-color: var(--glow-line);
+      background: rgba(7, 9, 26, 0.7);
+    }
+    .url-load-btn {
+      background: var(--glow);
+      color: var(--bg-deep);
+      border: none;
+      border-radius: 14px;
+      padding: 0 22px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .url-load-btn:active { transform: scale(0.96); }
+    .url-load-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .player-frame {
+      margin-top: 18px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      display: none;
+    }
+    .player-frame.visible { display: block; }
+    #player { width: 100%; height: 100%; }
+
+    .video-title {
+      margin-top: 12px;
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.4;
+      display: none;
+    }
+    .video-title.visible { display: block; }
+
+    /* ---------- PRESET CHIPS ---------- */
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+      gap: 10px;
+    }
+    .chip {
+      background: rgba(7, 9, 26, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 16px 8px;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+    }
+    .chip:active { transform: scale(0.96); }
+    .chip.active {
+      background: var(--glow-soft);
+      border-color: var(--glow-line);
+      color: var(--glow);
+      box-shadow: 0 0 0 1px var(--glow-line) inset;
+    }
+    .chip-unit {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-top: 2px;
+    }
+    .chip.active .chip-unit { color: var(--glow); opacity: 0.7; }
+
+    .custom-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .custom-input {
+      flex: 1;
+      background: rgba(7, 9, 26, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      min-width: 0;
+    }
+    .custom-input:focus {
+      outline: none;
+      border-color: var(--glow-line);
+    }
+
+    /* ---------- FADE SLIDER ---------- */
+    .slider-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .slider-readout {
+      font-family: var(--serif);
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--glow);
+      font-feature-settings: 'tnum';
+    }
+    .slider-readout small {
+      font-family: var(--sans);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--glow);
+      cursor: pointer;
+      box-shadow: 0 0 16px var(--glow-soft), 0 2px 6px rgba(0,0,0,0.4);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--glow);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 16px var(--glow-soft), 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    /* ---------- START BUTTON ---------- */
+    .start-btn {
+      width: 100%;
+      padding: 22px;
+      background: linear-gradient(180deg, var(--glow), #d9a955);
+      color: var(--bg-deep);
+      border: none;
+      border-radius: 18px;
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 8px 32px rgba(245, 201, 122, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      margin-top: 8px;
+    }
+    .start-btn:active { transform: scale(0.98); }
+    .start-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .start-btn em { font-style: italic; }
+
+    .hint {
+      text-align: center;
+      color: var(--ink-faint);
+      font-size: 13px;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    /* ---------- RUNNING SCREEN ---------- */
+    #running-screen {
+      max-width: 540px;
+      text-align: center;
+      padding: 40px 28px;
+    }
+    .running-status {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 24px;
+    }
+    .running-status .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--glow);
+      margin-right: 8px;
+      vertical-align: middle;
+      animation: pulse 2.4s ease-in-out infinite;
+      box-shadow: 0 0 12px var(--glow-line);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .countdown {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(80px, 22vw, 180px);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-feature-settings: 'tnum';
+      color: var(--ink);
+      margin-bottom: 16px;
+      transition: color 0.6s ease;
+    }
+    .countdown.fading { color: var(--glow); }
+
+    .running-sub {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--ink-dim);
+      margin-bottom: 40px;
+      min-height: 1.4em;
+    }
+
+    .running-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .secondary-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 14px;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .secondary-btn:active { background: rgba(255, 255, 255, 0.04); }
+    .cancel-btn {
+      color: var(--danger);
+      border-color: rgba(229, 138, 138, 0.3);
+    }
+
+    .mini-player {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      bottom: 0;
+      right: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ---------- DONE SCREEN ---------- */
+    #done-screen {
+      max-width: 480px;
+      text-align: center;
+    }
+    .done-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(36px, 7vw, 56px);
+      margin-bottom: 14px;
+      color: var(--ink);
+    }
+    .done-sub {
+      color: var(--ink-dim);
+      font-size: 16px;
+      margin-bottom: 36px;
+    }
+
+    /* ---------- ERROR ---------- */
+    .error-msg {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 480px) {
+      .screen { padding: 20px 18px; }
+      .card { padding: 22px 20px; }
+      .brand-text { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SETUP SCREEN -->
+  <div id="setup-screen" class="screen">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">Lullaby<em>.</em></div>
+    </div>
+
+    <div class="card">
+      <div class="label">YouTube link</div>
+      <div class="url-row">
+        <input type="url" class="url-input" id="urlInput" placeholder="Paste a YouTube URL" value="https://youtu.be/yLuEx-XH3Uc" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="url-load-btn" id="loadBtn">Load</button>
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+      <div class="player-frame visible" id="playerFrame">
+        <iframe id="player" frameborder="0" allowfullscreen="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" title="YouTube video player" width="100%" height="100%" src="./index_files/saved_resource.html"></iframe>
+      </div>
+      <div class="video-title visible" id="videoTitle">Tap play in the video, then begin the lullaby below.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Sleep timer</div>
+      <div class="chips" id="presetChips">
+        <button class="chip" data-min="15">15<span class="chip-unit">min</span></button>
+        <button class="chip active" data-min="30">30<span class="chip-unit">min</span></button>
+        <button class="chip" data-min="45">45<span class="chip-unit">min</span></button>
+        <button class="chip" data-min="60">60<span class="chip-unit">min</span></button>
+        <button class="chip" data-min="90">90<span class="chip-unit">min</span></button>
+      </div>
+      <div class="custom-row">
+        <input type="number" class="custom-input" id="customMin" placeholder="Custom (minutes)" min="1" max="480" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Fade out duration</div>
+      <div class="slider-wrap">
+        <div class="slider-readout">
+          <span id="fadeReadout">15</span><small>seconds</small>
+        </div>
+        <input type="range" id="fadeSlider" min="10" max="30" value="15" step="1">
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn" disabled="">Begin <em>lullaby</em></button>
+    <p class="hint">Keep this tab open and the iPad screen on. Lower brightness all the way for a dark room.</p>
+  </div>
+
+  <!-- RUNNING SCREEN -->
+  <div id="running-screen" class="screen hidden">
+    <div class="running-status"><span class="dot"></span><span id="runStatus">Playing</span></div>
+    <div class="countdown" id="countdown">30:00</div>
+    <div class="running-sub" id="runSub">until silence</div>
+    <div class="running-actions">
+      <button class="secondary-btn" id="addFiveBtn">+ 5 minutes</button>
+      <button class="secondary-btn cancel-btn" id="cancelBtn">Cancel timer</button>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="done-screen" class="screen hidden">
+    <div class="brand" style="justify-content: center;">
+      <div class="brand-mark" style="opacity: 0.5"></div>
+    </div>
+    <div class="done-title">Goodnight<em>.</em></div>
+    <div class="done-sub">The music has faded.</div>
+    <div class="running-actions">
+      <button class="secondary-btn" id="restartBtn">Start again</button>
+    </div>
+  </div>
+
+  <script type="text/javascript" id="www-widgetapi-script" src="./index_files/www-widgetapi.js" async=""></script><script src="./index_files/iframe_api"></script>
+  <script>
+    // ---------- STATE ----------
+    let player = null;
+    let playerReady = false;
+    let videoLoaded = false;
+    let timerMin = 30;
+    let fadeSec = 15;
+    let timerEndTime = null;
+    let fadeStartTime = null;
+    let originalVolume = 100;
+    let rafId = null;
+    let wakeLock = null;
+
+    // ---------- ELEMENTS ----------
+    const $ = (id) => document.getElementById(id);
+    const setupScreen = $('setup-screen');
+    const runningScreen = $('running-screen');
+    const doneScreen = $('done-screen');
+    const urlInput = $('urlInput');
+    const loadBtn = $('loadBtn');
+    const errorMsg = $('errorMsg');
+    const playerFrame = $('playerFrame');
+    const videoTitle = $('videoTitle');
+    const presetChips = $('presetChips');
+    const customMin = $('customMin');
+    const fadeSlider = $('fadeSlider');
+    const fadeReadout = $('fadeReadout');
+    const startBtn = $('startBtn');
+    const countdown = $('countdown');
+    const runSub = $('runSub');
+    const runStatus = $('runStatus');
+    const addFiveBtn = $('addFiveBtn');
+    const cancelBtn = $('cancelBtn');
+    const restartBtn = $('restartBtn');
+
+    // ---------- VIDEO ID PARSING ----------
+    function extractVideoId(url) {
+      if (!url) return null;
+      url = url.trim();
+      // Already an 11-char ID?
+      if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+      try {
+        const u = new URL(url);
+        // youtu.be/<id>
+        if (u.hostname.includes('youtu.be')) {
+          return u.pathname.slice(1).split('/')[0] || null;
+        }
+        // youtube.com/watch?v=<id>
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+        // youtube.com/embed/<id> or /shorts/<id> or /live/<id>
+        const m = u.pathname.match(/\/(embed|shorts|live|v)\/([A-Za-z0-9_-]{11})/);
+        if (m) return m[2];
+      } catch (e) { /* fallthrough */ }
+      // Last resort: regex on raw string
+      const m = url.match(/[A-Za-z0-9_-]{11}/);
+      return m ? m[0] : null;
+    }
+
+    // ---------- YOUTUBE API ----------
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: '',
+        playerVars: {
+          'playsinline': 1,
+          'rel': 0,
+          'modestbranding': 1,
+          'iv_load_policy': 3
+        },
+        events: {
+          'onReady': () => {
+            playerReady = true;
+            // Auto-load whatever URL is in the input on launch
+            if (urlInput.value.trim()) {
+              loadVideo();
+            }
+          },
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    }
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+    function onPlayerStateChange(e) {
+      // YT.PlayerState.PLAYING = 1
+      if (e.data === YT.PlayerState.PLAYING && timerEndTime) {
+        runStatus.textContent = 'Playing';
+      } else if (e.data === YT.PlayerState.PAUSED && timerEndTime) {
+        runStatus.textContent = 'Paused';
+      }
+    }
+
+    function onPlayerError(e) {
+      showError('That video can\u2019t be embedded. Try a different one.');
+      videoLoaded = false;
+      updateStartButton();
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      setTimeout(() => { if (errorMsg.textContent === msg) errorMsg.textContent = ''; }, 4000);
+    }
+
+    // ---------- LOAD VIDEO ----------
+    loadBtn.addEventListener('click', loadVideo);
+    urlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); loadVideo(); }
+    });
+
+    function loadVideo() {
+      const id = extractVideoId(urlInput.value);
+      if (!id) {
+        showError('Couldn\u2019t find a video ID in that link.');
+        return;
+      }
+      if (!playerReady) {
+        showError('Player still loading\u2026 try again in a second.');
+        return;
+      }
+      errorMsg.textContent = '';
+      player.cueVideoById(id);
+      playerFrame.classList.add('visible');
+      videoTitle.classList.add('visible');
+      videoTitle.textContent = 'Tap play in the video, then begin the lullaby below.';
+      videoLoaded = true;
+      updateStartButton();
+    }
+
+    // ---------- PRESET CHIPS ----------
+    presetChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      [...presetChips.children].forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      timerMin = parseInt(chip.dataset.min, 10);
+      customMin.value = '';
+    });
+
+    customMin.addEventListener('input', () => {
+      const v = parseInt(customMin.value, 10);
+      if (!isNaN(v) && v > 0) {
+        timerMin = v;
+        [...presetChips.children].forEach(c => c.classList.remove('active'));
+      }
+    });
+
+    // ---------- FADE SLIDER ----------
+    fadeSlider.addEventListener('input', () => {
+      fadeSec = parseInt(fadeSlider.value, 10);
+      fadeReadout.textContent = fadeSec;
+    });
+
+    function updateStartButton() {
+      startBtn.disabled = !videoLoaded;
+    }
+
+    // ---------- START ----------
+    startBtn.addEventListener('click', startTimer);
+
+    async function startTimer() {
+      if (!videoLoaded || !playerReady) return;
+
+      // Make sure video is playing
+      try {
+        player.unMute();
+        originalVolume = 100;
+        player.setVolume(originalVolume);
+        player.playVideo();
+      } catch (err) {
+        showError('Could not start playback.');
+        return;
+      }
+
+      const totalMs = timerMin * 60 * 1000;
+      timerEndTime = Date.now() + totalMs;
+      fadeStartTime = timerEndTime - (fadeSec * 1000);
+
+      setupScreen.classList.add('hidden');
+      doneScreen.classList.add('hidden');
+      runningScreen.classList.remove('hidden');
+      runStatus.textContent = 'Playing';
+      runSub.textContent = 'until silence';
+      countdown.classList.remove('fading');
+
+      requestWakeLock();
+      tickLoop();
+    }
+
+    // ---------- TICK / FADE LOOP ----------
+    function tickLoop() {
+      const now = Date.now();
+      const remaining = timerEndTime - now;
+
+      if (remaining <= 0) {
+        finishTimer();
+        return;
+      }
+
+      // Update countdown text
+      countdown.textContent = formatTime(remaining);
+
+      // Fade phase
+      if (now >= fadeStartTime) {
+        const fadeElapsed = now - fadeStartTime;
+        const fadeTotal = timerEndTime - fadeStartTime;
+        const progress = Math.min(1, Math.max(0, fadeElapsed / fadeTotal));
+        // Ease-in quadratic curve: gentle at first, then accelerates.
+        // Sounds more natural than linear because perceived loudness is roughly logarithmic.
+        const remainingFraction = (1 - progress) * (1 - progress);
+        const newVolume = Math.max(0, Math.round(originalVolume * remainingFraction));
+        try { player.setVolume(newVolume); } catch (e) {}
+        countdown.classList.add('fading');
+        runSub.textContent = 'fading to silence\u2026';
+        runStatus.textContent = 'Fading';
+      }
+
+      rafId = requestAnimationFrame(tickLoop);
+    }
+
+    function formatTime(ms) {
+      const totalSec = Math.ceil(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function finishTimer() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      try {
+        player.setVolume(0);
+        player.pauseVideo();
+      } catch (e) {}
+      timerEndTime = null;
+      fadeStartTime = null;
+      releaseWakeLock();
+
+      runningScreen.classList.add('hidden');
+      doneScreen.classList.remove('hidden');
+    }
+
+    // ---------- ADD TIME / CANCEL ----------
+    addFiveBtn.addEventListener('click', () => {
+      if (!timerEndTime) return;
+      timerEndTime += 5 * 60 * 1000;
+      fadeStartTime = timerEndTime - (fadeSec * 1000);
+      // If we were in fade phase, restore volume
+      try {
+        player.setVolume(originalVolume);
+      } catch (e) {}
+      countdown.classList.remove('fading');
+      runSub.textContent = 'until silence';
+      runStatus.textContent = 'Playing';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      try {
+        player.setVolume(originalVolume);
+        player.pauseVideo();
+      } catch (e) {}
+      timerEndTime = null;
+      fadeStartTime = null;
+      releaseWakeLock();
+      runningScreen.classList.add('hidden');
+      setupScreen.classList.remove('hidden');
+    });
+
+    restartBtn.addEventListener('click', () => {
+      doneScreen.classList.add('hidden');
+      setupScreen.classList.remove('hidden');
+    });
+
+    // ---------- WAKE LOCK ----------
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
+      } catch (e) { /* not critical */ }
+    }
+    async function releaseWakeLock() {
+      try {
+        if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      } catch (e) {}
+    }
+    async function handleVisibilityChange() {
+      if (wakeLock !== null && document.visibilityState === 'visible' && timerEndTime) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+      }
+    }
+  </script>
+
+
+</body></html>
